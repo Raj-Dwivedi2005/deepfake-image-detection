@@ -1,0 +1,55 @@
+# Central Configuration for Deepfake Image Classifier
+project:
+  name: deepfake-image-detection
+  seed: 42
+
+data:
+  dataset_name: "xhlulu/140k-real-and-fake-faces"
+  raw_dir: "data/raw"
+  processed_dir: "data/processed"
+  image_size: [256, 256]
+  channels: 3
+  split_ratios: [0.70, 0.15, 0.15]  # Train, Val, Test
+  max_samples: 10000                 # Subsampling for CPU efficiency, set to null for full set
+  batch_size: 32
+
+augmentation:
+  jpeg_quality_range: [40, 85]
+  rotation_range: 15
+  brightness_range: [0.8, 1.2]
+  flip_horizontal: true
+
+features:
+  pca_components: 50
+  lbp_points: 24
+  lbp_radius: 3
+  scaler_path: "reports/scaler.pkl"
+  pca_path: "reports/pca.pkl"
+
+models:
+  classical:
+    type: "random_forest"
+    n_estimators: 100
+    max_depth: 15
+    model_path: "reports/classical_model.pkl"
+  
+  custom_cnn:
+    epochs: 15
+    learning_rate: 0.001
+    model_path: "reports/custom_cnn.keras"
+  
+  transfer_learning:
+    backbone: "EfficientNetB0"
+    epochs: 12
+    learning_rate: 0.0005
+    fine_tune_at_layer: 100
+    model_path: "reports/efficientnet_model.keras"
+
+  fusion:
+    epochs: 10
+    learning_rate: 0.0003
+    model_path: "reports/fusion_model.keras"
+
+reports:
+  figures_dir: "reports/figures"
+  metrics_json: "reports/metrics.json"
