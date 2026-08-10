@@ -6,10 +6,9 @@ generator noise residual signatures. High-pass residual statistical moments expo
 
 import cv2
 import numpy as np
-from scipy.stats import skew, kurtosis
 
 class NoiseResidualFeatureExtractor:
-    """Extracts statistical metrics from high-pass noise residuals."""
+    """Extracts statistical metrics from high-pass noise residuals using fast vector NumPy."""
 
     def extract(self, image: np.ndarray) -> np.ndarray:
         """Extract high-pass noise residual statistical moments.
@@ -37,17 +36,18 @@ class NoiseResidualFeatureExtractor:
         # Laplacian high-pass filter residual
         laplacian_res = cv2.Laplacian(gray, cv2.CV_32F)
 
-        # Compute moments for Gaussian residual
-        res_mean = np.mean(residual)
-        res_var = np.var(residual)
-        res_skew = float(skew(residual.ravel()))
-        res_kurt = float(kurtosis(residual.ravel()))
+        # Fast NumPy statistical moment calculations
+        res_mean = float(np.mean(residual))
+        res_var = float(np.var(residual))
+        std_res = np.sqrt(res_var) + 1e-8
+        res_skew = float(np.mean(((residual - res_mean) / std_res) ** 3))
+        res_kurt = float(np.mean(((residual - res_mean) / std_res) ** 4) - 3.0)
 
-        # Compute moments for Laplacian residual
-        lap_mean = np.mean(laplacian_res)
-        lap_var = np.var(laplacian_res)
-        lap_skew = float(skew(laplacian_res.ravel()))
-        lap_kurt = float(kurtosis(laplacian_res.ravel()))
+        lap_mean = float(np.mean(laplacian_res))
+        lap_var = float(np.var(laplacian_res))
+        std_lap = np.sqrt(lap_var) + 1e-8
+        lap_skew = float(np.mean(((laplacian_res - lap_mean) / std_lap) ** 3))
+        lap_kurt = float(np.mean(((laplacian_res - lap_mean) / std_lap) ** 4) - 3.0)
 
         return np.array(
             [res_mean, res_var, res_skew, res_kurt, lap_mean, lap_var, lap_skew, lap_kurt],
