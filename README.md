@@ -1,5 +1,6 @@
 # 🛡️ Deepfake Image Detection: Multi-Modal Spectral & Deep Learning Classifier
 
+[![Live Demo](https://img.shields.io/badge/🚀_Live_Demo-Streamlit-red)](https://deepfake-detection-ai.streamlit.app)
 [![CI Status](https://github.com/Raj-Dwivedi2005/deepfake-image-detection/actions/workflows/ci.yml/badge.svg)](https://github.com/Raj-Dwivedi2005/deepfake-image-detection/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python Version](https://img.shields.io/badge/python-3.10%20%7C%203.11-blue.svg)](https://www.python.org/)
@@ -22,6 +23,8 @@ Generative neural networks introduce persistent micro-artifacts during upsamplin
 4. **Color space & chromatic aberration inconsistencies** in HSV channels.
 
 This codebase systematically benchmarks classical ML models trained on these handcrafted physical signals against modern deep convolutional networks and late-fusion architectures.
+
+![App Screenshot](reports/figures/app_screenshot.png)
 
 ---
 

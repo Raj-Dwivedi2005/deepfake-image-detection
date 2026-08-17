@@ -32,6 +32,9 @@ data/processed/
 reports/*.pkl
 reports/*.h5
 reports/*.keras
+!reports/classical_model.pkl
+!reports/scaler.pkl
+!reports/pca.pkl
 !reports/metrics.json
 !reports/figures/
 

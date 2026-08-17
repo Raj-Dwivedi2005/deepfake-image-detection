@@ -34,6 +34,9 @@ def predict_image(image_path: str, model_type: str = "classical", config_path: s
     if not path.exists():
         raise FileNotFoundError(f"Input image path does not exist: {image_path}")
 
+    # Determine project root path
+    project_root = Path(__file__).resolve().parents[2]
+    
     # 1. Load image & crop face
     img_bgr = cv2.imread(str(path))
     if img_bgr is None:
@@ -47,30 +50,33 @@ def predict_image(image_path: str, model_type: str = "classical", config_path: s
     # 2. Model Prediction
     if model_type == "classical":
         feature_extractor = HandcraftedFeatureExtractor()
-        if Path("reports/scaler.pkl").exists() and Path("reports/pca.pkl").exists():
-            feature_extractor.load(scaler_path="reports/scaler.pkl", pca_path="reports/pca.pkl")
+        scaler_path = project_root / "reports" / "scaler.pkl"
+        pca_path = project_root / "reports" / "pca.pkl"
+        model_path = project_root / "reports" / "classical_model.pkl"
+
+        if scaler_path.exists() and pca_path.exists():
+            feature_extractor.load(scaler_path=str(scaler_path), pca_path=str(pca_path))
             raw_feat = feature_extractor.extract_raw_features(normalized_face)
             transformed_feat = feature_extractor.transform(np.expand_dims(raw_feat, axis=0))
         else:
-            # Fallback fit on raw feature if not trained
             raw_feat = feature_extractor.extract_raw_features(normalized_face)
             transformed_feat = feature_extractor.fit_transform(np.expand_dims(raw_feat, axis=0))
 
         model = ClassicalBaselineModel(model_type="random_forest")
-        if Path("reports/classical_model.pkl").exists():
-            model.load("reports/classical_model.pkl")
+        if model_path.exists():
+            model.load(str(model_path))
             prob_fake = float(model.predict_proba(transformed_feat)[0, 1])
         else:
-            # Default placeholder confidence if model weight is absent
-            prob_fake = float(np.mean(transformed_feat) > 0)
+            raise FileNotFoundError(f"Classical model artifact not found at {model_path}. Please export model artifacts first.")
     elif model_type in ["custom_cnn", "efficientnet"]:
         import tensorflow as tf
-        model_path = "reports/custom_cnn.keras" if model_type == "custom_cnn" else "reports/efficientnet_model.keras"
-        if Path(model_path).exists():
-            model = tf.keras.models.load_model(model_path)
+        model_name = "custom_cnn.keras" if model_type == "custom_cnn" else "efficientnet_model.keras"
+        model_path = project_root / "reports" / model_name
+        if model_path.exists():
+            model = tf.keras.models.load_model(str(model_path))
             prob_fake = float(model.predict(np.expand_dims(normalized_face, axis=0))[0, 0])
         else:
-            prob_fake = 0.5
+            raise FileNotFoundError(f"Deep learning model artifact '{model_name}' not found at {model_path}. The classical baseline is active by default.")
     else:
         raise ValueError(f"Unknown model_type: {model_type}")
 
